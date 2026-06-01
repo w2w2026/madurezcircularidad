@@ -5,63 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Evaluación de Madurez Circular Empresarial — Waste 2 Worth</title>
   <meta name="description" content="Herramienta digital para evaluar el nivel de madurez en economía circular de empresas, basada en el marco de la Ellen MacArthur Foundation." />
-
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-
-  <!-- React + Babel (for JSX in browser) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #F4F7F6; font-family: 'DM Sans', sans-serif; }
-  </style>
+  <style>* { margin: 0; padding: 0; box-sizing: border-box; } body { background: #F4F7F6; font-family: 'DM Sans', sans-serif; }</style>
 </head>
 <body>
   <div id="root"></div>
-
-  <!-- Storage polyfill for GitHub Pages (localStorage-based) -->
   <script>
     window.storage = {
-      _key: function(key, shared) { return (shared ? 'shared_' : 'local_') + key; },
-      get: function(key, shared) {
-        return new Promise(function(resolve, reject) {
-          try {
-            var val = localStorage.getItem(window.storage._key(key, shared));
-            if (val === null) reject(new Error('Key not found'));
-            else resolve({ key: key, value: val, shared: !!shared });
-          } catch(e) { reject(e); }
-        });
-      },
-      set: function(key, value, shared) {
-        return new Promise(function(resolve) {
-          try { localStorage.setItem(window.storage._key(key, shared), value); }
-          catch(e) { console.error('Storage set error', e); }
-          resolve({ key: key, value: value, shared: !!shared });
-        });
-      },
-      delete: function(key, shared) {
-        return new Promise(function(resolve) {
-          localStorage.removeItem(window.storage._key(key, shared));
-          resolve({ key: key, deleted: true });
-        });
-      },
-      list: function(prefix, shared) {
-        return new Promise(function(resolve) {
-          var pfx = window.storage._key(prefix || '', shared);
-          var keys = [];
-          for (var i = 0; i < localStorage.length; i++) {
-            var k = localStorage.key(i);
-            if (k && k.startsWith(pfx)) keys.push(k.replace(pfx, ''));
-          }
-          resolve({ keys: keys });
-        });
-      }
+      _k: function(k,s){ return (s?'sh_':'lc_')+k; },
+      get: function(k,s){ return new Promise(function(res,rej){ var v=localStorage.getItem(window.storage._k(k,s)); if(v===null)rej(new Error('not found')); else res({key:k,value:v,shared:!!s}); }); },
+      set: function(k,v,s){ return new Promise(function(res){ try{localStorage.setItem(window.storage._k(k,s),v);}catch(e){} res({key:k,value:v,shared:!!s}); }); },
+      delete: function(k,s){ return new Promise(function(res){ localStorage.removeItem(window.storage._k(k,s)); res({deleted:true}); }); },
+      list: function(p,s){ return new Promise(function(res){ var pfx=window.storage._k(p||'',s),keys=[]; for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith(pfx))keys.push(k.replace(pfx,''));} res({keys:keys}); }); }
     };
   </script>
-
   <script type="text/babel">
     const { useState, useEffect } = React;
 
@@ -105,6 +65,75 @@ const LEVELS = [
 ];
 const getLevel = s => LEVELS.find(l=>s>=l.range[0]&&s<=l.range[1])||LEVELS[0];
 
+// What each level means + how to advance
+const LEVEL_DETAIL = {
+  "REACTIVO": {
+    significa:[
+      "Tu organización responde a la sostenibilidad solo cuando hay presión externa (regulación, clientes, mercado).",
+      "No existe una estrategia formal de economía circular ni compromisos concretos.",
+      "Las acciones de sostenibilidad son aisladas y no están integradas en el modelo de negocio."
+    ],
+    paraAvanzar:[
+      "Nombrar un responsable interno de la agenda de sostenibilidad.",
+      "Realizar un diagnóstico de residuos y consumo energético de la operación.",
+      "Incluir la economía circular como tema en la agenda directiva.",
+      "Identificar 1 o 2 quick wins en reducción de residuos o eficiencia energética."
+    ]
+  },
+  "ACTIVO": {
+    significa:[
+      "Tu organización ha identificado oportunidades circulares y ha tomado acciones puntuales.",
+      "Existen iniciativas de sostenibilidad pero aún no están integradas en la estrategia.",
+      "Hay interés genuino pero falta estructura, recursos y métricas claras."
+    ],
+    paraAvanzar:[
+      "Formalizar una política de economía circular con objetivos medibles.",
+      "Integrar criterios de sostenibilidad en la selección de proveedores.",
+      "Establecer indicadores de circularidad y hacer seguimiento trimestral.",
+      "Capacitar al equipo directivo y operativo en principios de EC."
+    ]
+  },
+  "ESTABLECIDO": {
+    significa:[
+      "La economía circular está integrada en la estrategia y los procesos de la organización.",
+      "Existen métricas, objetivos formales y recursos asignados para la transición circular.",
+      "La cadena de valor comienza a incorporar criterios circulares."
+    ],
+    paraAvanzar:[
+      "Desarrollar modelos de negocio circulares que generen nuevas fuentes de ingreso.",
+      "Ampliar la colaboración circular a clientes y proveedores clave.",
+      "Publicar un reporte de sostenibilidad estructurado (GRI, B Corp u otro).",
+      "Explorar alianzas de simbiosis industrial o economía colaborativa."
+    ]
+  },
+  "INTEGRADO": {
+    significa:[
+      "La circularidad es un pilar estratégico que genera valor diferencial para tu organización.",
+      "Existe colaboración activa con la cadena de valor y reporte público de avances.",
+      "Los modelos de negocio circulares generan ingresos reales."
+    ],
+    paraAvanzar:[
+      "Escalar modelos circulares exitosos a nuevos mercados o líneas de negocio.",
+      "Adoptar estándares de verificación externa (certificaciones, auditorías).",
+      "Liderar iniciativas sectoriales o gremiales de economía circular.",
+      "Desarrollar innovación circular como ventaja competitiva sostenible."
+    ]
+  },
+  "PROACTIVO": {
+    significa:[
+      "Tu organización es referente en economía circular dentro de su sector.",
+      "Los modelos regenerativos son el centro del modelo de negocio.",
+      "Existe articulación sistémica con el ecosistema y mejora continua estructurada."
+    ],
+    paraAvanzar:[
+      "Compartir aprendizajes y metodologías con otras organizaciones del sector.",
+      "Explorar modelos de impacto regenerativo más allá de la neutralidad.",
+      "Co-crear estándares sectoriales de circularidad.",
+      "Articular agendas de política pública en economía circular."
+    ]
+  }
+};
+
 const DIMS = [
   {id:"diseno",    name:"Diseño de Productos/Servicios",    icon:"◎", color:P.teal},
   {id:"materiales",name:"Gestión de Materiales y Residuos", icon:"♻", color:P.salmon},
@@ -126,7 +155,7 @@ const QS = [
    opts:OPT5("No se considera","Se menciona sin procesos formales","Hay criterios definidos en algunos casos","Es parte del proceso estándar","Principio central con métricas")},
   {id:"d2",dim:"diseno",
    text:"¿Analizan los impactos ambientales de sus productos/servicios a lo largo de su cadena de valor (insumos, operación, entrega y disposición final)?",
-   tip:"Para servicios: ¿evalúan los recursos que consumen y residuos que generan? Para productos: ¿desde materias primas hasta fin de vida?",
+   tip:"Ej: calcular cuánta agua y energía se consume al fabricar un producto, qué emisiones genera transportarlo y qué pasa con él cuando el cliente lo desecha. Para servicios: ¿saben cuánto CO₂ generan sus desplazamientos o cuánta energía consume su operación?",
    opts:OPT5("No se analiza","Se discute informalmente","Se analiza en algunos casos","Existe un proceso sistemático","Análisis formal integrado en decisiones estratégicas")},
   {id:"d3",dim:"diseno",na:true,
    text:"¿Sus productos o los insumos físicos de sus servicios se seleccionan pensando en facilitar su reutilización o valorización al final de su vida útil?",
@@ -134,7 +163,7 @@ const QS = [
    opts:NA("No aplica / no usamos insumos físicos relevantes","No se considera","Aplicado en algunos insumos","Criterio estándar en compras y diseño")},
   {id:"d4",dim:"diseno",na:true,
    text:"¿Ofrecen alguna alternativa de servicio en lugar de venta de producto (suscripción, uso, pago por rendimiento)?",
-   tip:"Ej: arrendamiento, 'producto como servicio', pago por uso.",
+   tip:"Ej: Xerox no vende impresoras sino que cobra por página impresa; una empresa de maquinaria cobra por horas de uso en lugar de vender el equipo.",
    opts:NA("No aplica a nuestro modelo","No lo hemos explorado","Tenemos alguna oferta en este sentido","Es parte importante de nuestro portafolio")},
   // MATERIALES
   {id:"m1",dim:"materiales",
@@ -171,6 +200,7 @@ const QS = [
    opts:OPT5("No se han identificado","Se discuten sin avance","1-2 pilotos en marcha","Varios modelos circulares generando ingresos","Transformación del modelo hacia la EC")},
   {id:"n3",dim:"modelos",
    text:"¿Su organización reporta públicamente sus avances en sostenibilidad o circularidad?",
+   tip:"Ej: GRI (Global Reporting Initiative, el estándar internacional más usado para reportes de sostenibilidad), B Corp, ISO 14001, Pacto Global o memoria anual de sostenibilidad.",
    opts:OPT5("No se reporta","Comunicación interna únicamente","Reporte básico o parcial","Reporte estructurado (GRI, B Corp, etc.)","Verificación externa y compromisos públicos")},
   {id:"n4",dim:"modelos",
    text:"¿Cuentan con métricas o indicadores propios para medir el avance hacia la circularidad?",
@@ -184,6 +214,7 @@ const QS = [
    opts:NA("No aplica a nuestro tipo de relación","No existe esta colaboración","Programas concretos con algunos clientes","Parte integral de la propuesta de valor")},
   {id:"c3",dim:"cadena",na:true,
    text:"¿Implementan o participan en sistemas de logística inversa para recuperar productos, empaques o materiales?",
+   tip:"Ej: un fabricante que recoge sus empaques usados al final del ciclo, o una empresa que retira sus equipos cuando termina el contrato con el cliente.",
    opts:NA("No aplica a nuestro sector/modelo","No existe","Implementado parcialmente","Sistema robusto con cobertura amplia")},
   {id:"c4",dim:"cadena",
    text:"¿Han identificado y mapeado los principales recursos, insumos y flujos de valor de su operación o cadena de suministro?",
@@ -210,7 +241,7 @@ const QS = [
 const AQS = [
   {id:"a1",text:"¿Tiene activos físicos (maquinaria, vehículos, equipos) que podrían compartirse, alquilarse o usarse más eficientemente?"},
   {id:"a2",text:"¿Existen capacidades o procesos internos que podrían ofrecerse como servicio a otras organizaciones?"},
-  {id:"a3",text:"¿Los residuos o subproductos de su operación podrían ser insumos valiosos para otra empresa (simbiosis industrial)?"},
+  {id:"a3",text:"¿Los residuos o subproductos de su operación podrían ser insumos valiosos para otra empresa (simbiosis industrial)?",tip:"Ej: los residuos orgánicos de una cervecería se convierten en insumo para una empresa de compostaje; el vapor sobrante de una planta industrial se usa para calentar instalaciones vecinas."},
   {id:"a4",text:"¿Tiene acceso a redes que podrían potenciar modelos colaborativos de economía circular?"},
   {id:"a5",text:"¿Existen datos o plataformas digitales que podrían habilitarse para crear nuevos modelos de negocio circular?"},
 ];
@@ -317,6 +348,8 @@ function Radar({scores}) {
 function Results({ans,aAns,co,onRestart}) {
   const [ai,setAi]=useState(null);
   const [dl,setDl]=useState(false);
+  const [showLevel,setShowLevel]=useState(false);
+  const [showNext,setShowNext]=useState(false);
 
   const ds={};
   DIMS.forEach(d=>{
@@ -325,6 +358,8 @@ function Results({ans,aAns,co,onRestart}) {
   });
   const score=Math.round(Object.values(ds).reduce((a,b)=>a+b,0)/DIMS.length);
   const lv=getLevel(score);
+  const lvIdx=LEVELS.findIndex(l=>l.name===lv.name);
+  const nextLv=lvIdx<LEVELS.length-1?LEVELS[lvIdx+1]:null;
   const aSc=Object.values(aAns).reduce((a,b)=>a+(b||0),0);
   const aPct=Math.round((aSc/(AQS.length*3))*100);
 
@@ -332,7 +367,7 @@ function Results({ans,aAns,co,onRestart}) {
     try {
       const existing = await window.storage.get("w2w_results",true).catch(()=>null);
       const all = existing ? JSON.parse(existing.value) : [];
-      all.push({ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData});
+      all.push({ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData,answers,assetAnswers});
       await window.storage.set("w2w_results",JSON.stringify(all),true);
     } catch(e){ console.error("Storage error:",e); }
   };
@@ -402,9 +437,52 @@ function Results({ans,aAns,co,onRestart}) {
         <div style={{fontSize:11,letterSpacing:2.5,color:P.teal,textTransform:"uppercase",marginBottom:4}}>Puntaje Global de Circularidad</div>
         <div style={{fontSize:80,fontWeight:900,color:P.white,lineHeight:1,fontFamily:"'Playfair Display',serif"}}>{score}</div>
         <div style={{fontSize:13,color:P.tealL,marginBottom:14}}>de 100 puntos</div>
-        <div style={{display:"inline-block",background:lv.color,color:P.dark,padding:"8px 28px",borderRadius:30,fontSize:15,fontWeight:800,letterSpacing:2,textTransform:"uppercase",marginBottom:10}}>{lv.name}</div>
+        <button onClick={()=>setShowLevel(!showLevel)} style={{display:"inline-block",background:lv.color,color:P.dark,padding:"8px 28px",borderRadius:30,fontSize:15,fontWeight:800,letterSpacing:2,textTransform:"uppercase",marginBottom:10,border:"none",cursor:"pointer"}}>
+          {lv.name} {showLevel?"▲":"▼"}
+        </button>
         <p style={{color:P.tealL,fontSize:13,maxWidth:440,margin:"0 auto",lineHeight:1.6}}>{lv.desc}</p>
       </div>
+
+      {/* Level detail expandable */}
+      {showLevel&&(
+        <div style={{...css.card,border:`2px solid ${lv.color}`,padding:24,marginBottom:16}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+            <div>
+              <div style={{fontSize:10.5,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:lv.color,marginBottom:3}}>Tu nivel actual</div>
+              <div style={{fontSize:22,fontWeight:800,color:P.dark}}>{lv.name}</div>
+            </div>
+            <div style={{background:lv.color,color:P.dark,padding:"6px 18px",borderRadius:20,fontSize:12,fontWeight:700}}>{lv.range[0]}–{lv.range[1]} pts</div>
+          </div>
+          <div style={{fontSize:11,fontWeight:700,color:P.sage,letterSpacing:1.5,textTransform:"uppercase",marginBottom:8}}>¿Qué significa este nivel?</div>
+          {(LEVEL_DETAIL[lv.name]?.significa||[]).map((s,i)=>(
+            <div key={i} style={{display:"flex",gap:10,marginBottom:7,alignItems:"flex-start"}}>
+              <div style={{width:6,height:6,borderRadius:"50%",background:lv.color,flexShrink:0,marginTop:6}}/>
+              <p style={{fontSize:13,color:P.txt,lineHeight:1.5,margin:0}}>{s}</p>
+            </div>
+          ))}
+          {nextLv&&(
+            <div style={{marginTop:18}}>
+              <button onClick={()=>setShowNext(!showNext)} style={{background:`linear-gradient(135deg,${P.dark},${lv.color})`,color:P.white,border:"none",borderRadius:10,padding:"11px 22px",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8,width:"100%",justifyContent:"center"}}>
+                🚀 ¿Quieres pasar al nivel {nextLv.name}? {showNext?"▲":"▼"}
+              </button>
+              {showNext&&(
+                <div style={{marginTop:14,background:P.bg2,borderRadius:10,padding:16}}>
+                  <div style={{fontSize:11,fontWeight:700,color:P.sage,letterSpacing:1.5,textTransform:"uppercase",marginBottom:10}}>Acciones para avanzar al nivel {nextLv.name}</div>
+                  {(LEVEL_DETAIL[lv.name]?.paraAvanzar||[]).map((a,i)=>(
+                    <div key={i} style={{display:"flex",gap:10,marginBottom:8,alignItems:"flex-start"}}>
+                      <div style={{width:22,height:22,borderRadius:"50%",background:nextLv.color,color:P.dark,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,flexShrink:0}}>{i+1}</div>
+                      <p style={{fontSize:13,color:P.txt,lineHeight:1.5,margin:0}}>{a}</p>
+                    </div>
+                  ))}
+                  <div style={{marginTop:14,background:`${P.teal}18`,borderRadius:8,padding:12,borderLeft:`3px solid ${P.teal}`}}>
+                    <p style={{fontSize:13,color:P.txt,margin:0,lineHeight:1.5}}>💡 <strong>¿Quieres una hoja de ruta personalizada?</strong> Nuestro equipo puede acompañarte en este proceso. <strong style={{color:P.teal}}>info@w2wglobal.com</strong></p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Scale */}
       <div style={css.card}>
@@ -604,6 +682,43 @@ function Admin({onBack}) {
                           <div style={{fontSize:12,marginTop:4}}>💎 Activos: <b>{r.aPct||0}%</b></div>
                         </div>
                       </div>
+                      {r.answers&&(
+                        <div style={{marginTop:14,paddingTop:14,borderTop:`1px solid ${P.border}`}}>
+                          <div style={{fontSize:10.5,fontWeight:700,color:P.sage,marginBottom:10,letterSpacing:1.5,textTransform:"uppercase"}}>📋 Respuestas por Dimensión</div>
+                          {DIMS.map(dim=>(
+                            <div key={dim.id} style={{marginBottom:12}}>
+                              <div style={{fontSize:11,fontWeight:700,color:dim.color,marginBottom:6,display:"flex",alignItems:"center",gap:6}}>
+                                <span>{dim.icon}</span><span>{dim.name}</span>
+                              </div>
+                              {QS.filter(q=>q.dim===dim.id).map(q=>{
+                                const val = r.answers[q.id];
+                                const opt = q.opts.find(o=>o.value===val);
+                                return(
+                                  <div key={q.id} style={{display:"flex",gap:8,marginBottom:5,alignItems:"flex-start",paddingLeft:8,borderLeft:`2px solid ${dim.color}33`}}>
+                                    <p style={{fontSize:11,color:P.txt2,margin:0,flex:1,lineHeight:1.4}}>{q.text}</p>
+                                    <span style={{fontSize:11,fontWeight:600,color:val===null?"#aaa":P.dark,flexShrink:0,maxWidth:180,textAlign:"right",lineHeight:1.3}}>{opt?opt.label:"Sin respuesta"}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ))}
+                          {r.assetAnswers&&(
+                            <div style={{marginTop:10}}>
+                              <div style={{fontSize:11,fontWeight:700,color:P.teal,marginBottom:6}}>💎 Activos Circulares</div>
+                              {AQS.map((q,i)=>{
+                                const val = r.assetAnswers[q.id];
+                                const opts=["No / No lo hemos analizado","Posiblemente, sin análisis formal","Sí, hemos identificado oportunidades","Sí, tenemos un plan concreto"];
+                                return(
+                                  <div key={q.id} style={{display:"flex",gap:8,marginBottom:5,alignItems:"flex-start",paddingLeft:8,borderLeft:`2px solid ${P.teal}33`}}>
+                                    <p style={{fontSize:11,color:P.txt2,margin:0,flex:1,lineHeight:1.4}}>{q.text}</p>
+                                    <span style={{fontSize:11,fontWeight:600,color:P.dark,flexShrink:0,maxWidth:180,textAlign:"right",lineHeight:1.3}}>{val!=null?opts[val]:"Sin respuesta"}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
                       {r.ai&&(
                         <div style={{marginTop:14,paddingTop:14,borderTop:`1px solid ${P.border}`}}>
                           <div style={{fontSize:10.5,fontWeight:700,color:P.sage,marginBottom:8,letterSpacing:1.5,textTransform:"uppercase"}}>🔍 Análisis IA (solo visible para W2W)</div>
@@ -648,13 +763,14 @@ function CompanyForm({onNext}) {
   const [f,setF]=useState({razonSocial:"",nit:"",ciudad:"",pais:"Colombia",employees:"",sector:"",whyEC:"",contactName:"",contactRole:"",contactEmail:""});
   const [nitError,setNitError]=useState(null);
   const [checking,setChecking]=useState(false);
+  const [consent,setConsent]=useState(false);
   const set=(k,v)=>setF(p=>({...p,[k]:v}));
   const ok=f.razonSocial&&f.nit&&f.ciudad&&f.pais&&f.employees&&f.contactName&&f.contactEmail;
   const secs=["Manufactura / Producción Industrial","Servicios Profesionales","Tecnología / Software","Retail / Comercio","Construcción / Inmobiliaria","Agroindustria / Alimentos","Salud / Farmacéutica","Educación","Logística / Transporte","Energía / Utilities","Financiero / Seguros","Turismo / Hospitalidad","Moda / Textil","Otro"];
   const emps=["1-10","11-50","51-200","201-500","501-1000","Más de 1000"];
 
   const handleSubmit = async () => {
-    if(!ok) return;
+    if(!ok||!consent) return;
     setChecking(true);
     setNitError(null);
     try {
@@ -675,6 +791,24 @@ function CompanyForm({onNext}) {
   };
   return (
     <div>
+      {/* Video intro */}
+      <div style={{...css.card,padding:0,overflow:"hidden",marginBottom:16}}>
+        <div style={{background:P.dark,padding:"16px 24px 12px"}}>
+          <div style={{fontSize:10.5,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:P.teal,marginBottom:4}}>Antes de comenzar</div>
+          <p style={{color:P.white,fontSize:14,fontWeight:600,margin:0}}>Conoce quiénes somos y qué hacemos en Waste 2 Worth</p>
+        </div>
+        <div style={{position:"relative",paddingBottom:"56.25%",height:0,overflow:"hidden"}}>
+          <iframe
+            src="https://www.youtube.com/embed/d0-oAcO3lrs"
+            title="Waste 2 Worth"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{position:"absolute",top:0,left:0,width:"100%",height:"100%"}}
+          />
+        </div>
+      </div>
+
       <div style={{background:P.dark,borderRadius:13,padding:"36px 32px",marginBottom:16,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-20,right:-20,width:150,height:150,background:P.teal,borderRadius:"50%",opacity:.09}}/>
         <div style={{position:"absolute",bottom:-16,left:-16,width:110,height:110,background:P.cream,borderRadius:"50%",opacity:.08}}/>
@@ -689,6 +823,9 @@ function CompanyForm({onNext}) {
             {[["⏱","15-20 min"],["📋","25 preguntas"],["📊","Resultados inmediatos"]].map(([ic,lb])=>(
               <span key={lb} style={{display:"flex",alignItems:"center",gap:5,color:P.teal,fontSize:12}}>{ic} {lb}</span>
             ))}
+          </div>
+          <div style={{marginTop:16,paddingTop:14,borderTop:"1px solid #ffffff22"}}>
+            <p style={{color:P.tealL,fontSize:12}}>¿Tienes preguntas? Escríbenos a <strong style={{color:P.cream}}>info@w2wglobal.com</strong></p>
           </div>
         </div>
       </div>
@@ -726,6 +863,21 @@ function CompanyForm({onNext}) {
         </div>
       </div>
 
+      {/* Consent checkbox */}
+      <div style={{...css.card,background:"#f0f9f6",border:`1.5px solid ${P.border}`,padding:"16px 20px",marginBottom:16}}>
+        <label style={{display:"flex",alignItems:"flex-start",gap:12,cursor:"pointer"}}>
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={e=>setConsent(e.target.checked)}
+            style={{marginTop:3,accentColor:P.teal,width:16,height:16,flexShrink:0,cursor:"pointer"}}
+          />
+          <span style={{fontSize:13,color:P.txt,lineHeight:1.6}}>
+            Autorizo a <strong>Waste 2 Worth</strong> como responsable del tratamiento, para recolectar, almacenar, usar y circular los datos personales aquí suministrados, con la finalidad de realizar la evaluación de madurez circular y adelantar actividades de seguimiento comercial. El titular de los datos podrá ejercer sus derechos de acceso, corrección, supresión, revocación y presentación de quejas ante la Superintendencia de Industria y Comercio (SIC), escribiendo a <strong style={{color:P.teal}}>info@w2wglobal.com</strong>. Lo anterior, de conformidad con la <strong>Ley 1581 de 2012</strong> y el Decreto 1377 de 2013 sobre Protección de Datos Personales en Colombia.
+          </span>
+        </label>
+      </div>
+
       <div style={{marginBottom:28}}>
         {nitError&&(
           <div style={{background:"#FFF3F0",border:"1.5px solid #E09060",borderRadius:10,padding:"14px 18px",marginBottom:14,display:"flex",gap:12,alignItems:"flex-start"}}>
@@ -738,7 +890,8 @@ function CompanyForm({onNext}) {
         )}
         <div style={{textAlign:"right"}}>
           {!ok&&!nitError&&<p style={{fontSize:12,color:P.warn,marginBottom:6}}>* Complete los campos obligatorios</p>}
-          <button onClick={handleSubmit} style={{...css.btn,opacity:ok&&!checking?1:.45}}>
+          {ok&&!consent&&<p style={{fontSize:12,color:P.warn,marginBottom:6}}>* Debes aceptar el consentimiento de datos para continuar</p>}
+          <button onClick={handleSubmit} style={{...css.btn,opacity:ok&&consent&&!checking?1:.45}}>
             {checking?"Verificando...":"Iniciar Evaluación →"}
           </button>
         </div>
@@ -753,6 +906,7 @@ function App() {
   const [co,setCo]=useState(null);
   const [ans,setAns]=useState({});
   const [aAns,setAAns]=useState({});
+  const [showContact,setShowContact]=useState(false);
   const step=PAGES.indexOf(page);
   const isDim=["diseno","materiales","energia","modelos","cadena","cultura"].includes(page);
   const dimQs=isDim?QS.filter(q=>q.dim===page):[];
@@ -773,11 +927,19 @@ function App() {
       <div style={css.hdr}>
         <Logo small onDark/>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <span style={{color:P.tealL,fontSize:11}}>Marco: Ellen MacArthur Foundation</span>
+          <button onClick={()=>setShowContact(c=>!c)} style={{background:"none",border:`1px solid ${P.teal}`,color:P.teal,padding:"4px 11px",borderRadius:6,fontSize:11,fontWeight:600,cursor:"pointer"}}>✉ Contáctanos</button>
           <button onClick={()=>setPage("admin")} style={{background:"none",border:`1px solid ${P.teal}`,color:P.teal,padding:"4px 11px",borderRadius:6,fontSize:11,cursor:"pointer"}}>Admin</button>
         </div>
       </div>
 
+      {showContact&&(
+        <div style={{background:P.dark,borderBottom:`2px solid ${P.teal}`,padding:"12px 24px",textAlign:"center"}}>
+          <p style={{color:P.white,fontSize:13,margin:0}}>
+            📩 Escríbenos a <strong style={{color:P.cream,fontSize:15}}>info@w2wglobal.com</strong>
+            <button onClick={()=>setShowContact(false)} style={{marginLeft:16,background:"none",border:`1px solid ${P.teal}`,color:P.teal,padding:"2px 10px",borderRadius:5,fontSize:11,cursor:"pointer"}}>✕ Cerrar</button>
+          </p>
+        </div>
+      )}
       {page!=="form"&&page!=="results"&&<Progress step={step}/>}
 
       <div style={css.wrap}>
@@ -812,7 +974,8 @@ function App() {
             </div>
             {AQS.map((q,i)=>(
               <div key={q.id} style={{...css.card,padding:20,marginBottom:12,borderLeft:`4px solid ${P.teal}`}}>
-                <p style={{fontSize:14,fontWeight:600,color:P.dark,marginBottom:12,lineHeight:1.5}}>{i+1}. {q.text}</p>
+                <p style={{fontSize:14,fontWeight:600,color:P.dark,marginBottom:q.tip?3:12,lineHeight:1.5}}>{i+1}. {q.text}</p>
+                {q.tip&&<p style={{fontSize:12,color:P.txt2,marginBottom:12,fontStyle:"italic"}}>💡 {q.tip}</p>}
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
                   {AOPTS.map((o,j)=>(
                     <label key={j} style={{display:"flex",alignItems:"center",gap:9,padding:"8px 11px",borderRadius:8,
