@@ -165,6 +165,10 @@ const QS = [
    text:"¿Ofrecen alguna alternativa de servicio en lugar de venta de producto (suscripción, uso, pago por rendimiento)?",
    tip:"Ej: Xerox no vende impresoras sino que cobra por página impresa; una empresa de maquinaria cobra por horas de uso en lugar de vender el equipo.",
    opts:NA("No aplica a nuestro modelo","No lo hemos explorado","Tenemos alguna oferta en este sentido","Es parte importante de nuestro portafolio")},
+  {id:"d5",dim:"diseno",na:true,
+   text:"¿Los materiales o insumos utilizados en sus productos o servicios incluyen contenido reciclado, reciclable o de origen sostenible?",
+   tip:"Para productos: ¿usa materiales reciclados post-consumo o post-industrial en su fabricación? Para servicios: ¿los insumos físicos que usa (papel, equipos, materiales de oficina) tienen algún criterio de sostenibilidad en su origen?",
+   opts:NA("No aplica / no usamos materiales físicos relevantes","No se considera al momento de comprar","Lo evaluamos en algunos materiales clave","Es un criterio formal en nuestra política de compras")},
   // MATERIALES
   {id:"m1",dim:"materiales",
    text:"¿Su organización mide y gestiona los residuos generados en sus operaciones o en la prestación de sus servicios?",
@@ -181,6 +185,10 @@ const QS = [
    text:"¿Extienden activamente la vida útil de equipos, tecnología e infraestructura mediante mantenimiento o reparación antes de reemplazar?",
    tip:"Para servicios: computadores, equipos de comunicación, mobiliario, vehículos.",
    opts:OPT4("Solo se actúa cuando algo falla","Mantenimiento básico en elementos críticos","Programa preventivo formal","Gestión proactiva con metas de extensión de vida útil")},
+  {id:"m5",dim:"materiales",
+   text:"¿Los residuos o materiales generados en su operación son llevados a procesos de reciclaje, reutilización o valorización formal?",
+   tip:"¿Tienen gestores o aliados certificados que reciben sus residuos? ¿Saben qué pasa con los materiales después de que salen de su operación?",
+   opts:OPT5("No sabemos qué pasa con nuestros residuos","Se entregan a terceros sin verificar su destino","Algunos residuos van a gestores certificados","La mayoría de residuos tienen ruta de valorización verificada","Todos los residuos tienen ruta de valorización certificada y trazable")},
   // ENERGÍA
   {id:"e1",dim:"energia",
    text:"¿Su organización mide su consumo de energía y tiene objetivos de eficiencia o reducción?",
@@ -191,6 +199,10 @@ const QS = [
   {id:"e3",dim:"energia",na:true,
    text:"¿Gestionan activamente el consumo de agua con medidas de reducción o reutilización?",
    opts:NA("No aplica / consumo insignificante","Sin gestión activa","Medidas de eficiencia implementadas","Programa robusto con reutilización y métricas")},
+  {id:"e4",dim:"energia",
+   text:"¿Su organización ha implementado medidas concretas para mejorar la eficiencia energética en sus instalaciones, equipos o procesos?",
+   tip:"Ej: cambio a iluminación LED, apagado automático de equipos, aislamiento térmico, optimización de rutas de transporte, uso de equipos de bajo consumo.",
+   opts:OPT5("No se han implementado medidas","Acciones aisladas sin seguimiento","Algunas medidas con ahorro comprobado","Plan de eficiencia energética activo con métricas","Programa integral con inversión continua y resultados reportados")},
   // MODELOS
   {id:"n1",dim:"modelos",
    text:"¿La economía circular forma parte explícita de la estrategia o propuesta de valor de su organización?",
@@ -220,6 +232,10 @@ const QS = [
    text:"¿Han identificado y mapeado los principales recursos, insumos y flujos de valor de su operación o cadena de suministro?",
    tip:"Para servicios: ¿saben qué proveedores, herramientas y procesos son críticos y dónde hay desperdicios?",
    opts:OPT4("No se ha realizado","Conocimiento informal sin documentar","Mapeo parcial en proceso","Mapa completo con oportunidades identificadas")},
+  {id:"c5",dim:"cadena",
+   text:"¿Realizan procesos de evaluación y trazabilidad a sus proveedores para verificar el origen, calidad e impacto ambiental de los insumos que compran?",
+   tip:"¿Saben de dónde vienen los materiales que usan? ¿Verifican que sus proveedores cumplan estándares ambientales o sociales mínimos?",
+   opts:OPT5("No realizamos ninguna evaluación","Evaluación básica de calidad sin criterios ambientales","Algunos proveedores evaluados con criterios de sostenibilidad","Proceso formal de evaluación y seguimiento a proveedores clave","Trazabilidad completa de la cadena de suministro con verificación externa")},
   // CULTURA
   {id:"g1",dim:"cultura",
    text:"¿Existe un responsable o equipo designado para liderar la agenda de economía circular o sostenibilidad?",
@@ -236,6 +252,13 @@ const QS = [
   {id:"g5",dim:"cultura",
    text:"¿Tienen proyectos de innovación activos orientados a la circularidad (I+D, pilotos, aceleradoras)?",
    opts:OPT5("Sin proyectos","Ideas sin recursos","1-2 pilotos en marcha","Portafolio de innovación circular activo","Innovación circular como ventaja competitiva")},
+  {id:"g6",dim:"cultura",
+   text:"¿Su organización cuenta con una política formal de sostenibilidad o economía circular documentada y comunicada?",
+   tip:"Una política formal define compromisos, principios y lineamientos que guían las decisiones de la organización en materia ambiental y circular.",
+   opts:OPT5("No existe ninguna política","Hay lineamientos informales sin documentar","Política en construcción o borrador","Política formal documentada y comunicada internamente","Política pública, verificada y alineada con estándares internacionales")},
+  {id:"g7",dim:"cultura",
+   text:"¿Su organización destina un porcentaje del presupuesto o inversión a proyectos de sostenibilidad o economía circular?",
+   opts:OPT5("No se destina ningún recurso específico","Recursos ocasionales sin presupuesto definido","Presupuesto definido pero limitado (menor al 1%)","Inversión formal entre el 1% y 5% del presupuesto","Inversión estratégica superior al 5% con metas de impacto")},
 ];
 
 const AQS = [
