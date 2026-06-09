@@ -388,14 +388,40 @@ function Results({ans,aAns,co,onRestart}) {
 
   const saveRecord = async(aiData)=>{
     const record = {ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData,answers,assetAnswers};
-    // Save to Google Sheets
+    // Save to Google Sheets via GET (avoids CORS issues)
     try {
-      await fetch("https://script.google.com/macros/s/AKfycbwppn1_GANbfJ9wMXwCzIS5s9v4h5Deo8Ues2COfbA4TwP4BSKMNxfV8D7v9mSnOvTn/exec", {
-        method:"POST",
-        mode:"no-cors",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(record)
+      const co = record.co||{};
+      const ds = record.ds||{};
+      const ai = record.ai||{};
+      const ops = ai.oportunidades||[];
+      const safeStr = v => typeof v==="string" ? v : "";
+      const params = new URLSearchParams({
+        ts: record.ts||"",
+        razonSocial: co.razonSocial||"",
+        nit: co.nit||"",
+        ciudad: co.ciudad||"",
+        pais: co.pais||"",
+        employees: co.employees||"",
+        sector: co.sector||"",
+        contactName: co.contactName||"",
+        contactEmail: co.contactEmail||"",
+        score: record.score||0,
+        level: record.level||"",
+        diseno: ds.diseno||0,
+        materiales: ds.materiales||0,
+        energia: ds.energia||0,
+        modelos: ds.modelos||0,
+        cadena: ds.cadena||0,
+        cultura: ds.cultura||0,
+        aPct: record.aPct||0,
+        interpretacion: safeStr(ai.interpretacion),
+        op1: safeStr(ops[0]),
+        op2: safeStr(ops[1]),
+        op3: safeStr(ops[2]),
+        proximoPaso: safeStr(ai.proximoPaso)
       });
+      const img = new Image();
+      img.src = "https://script.google.com/macros/s/AKfycbwppn1_GANbfJ9wMXwCzIS5s9v4h5Deo8Ues2COfbA4TwP4BSKMNxfV8D7v9mSnOvTn/exec?" + params.toString();
     } catch(e){ console.error("Sheets error:",e); }
     // Also save to localStorage as backup
     try {
