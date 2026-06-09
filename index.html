@@ -387,10 +387,21 @@ function Results({ans,aAns,co,onRestart}) {
   const aPct=Math.round((aSc/(AQS.length*3))*100);
 
   const saveRecord = async(aiData)=>{
+    const record = {ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData,answers,assetAnswers};
+    // Save to Google Sheets
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbwppn1_GANbfJ9wMXwCzIS5s9v4h5Deo8Ues2COfbA4TwP4BSKMNxfV8D7v9mSnOvTn/exec", {
+        method:"POST",
+        mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(record)
+      });
+    } catch(e){ console.error("Sheets error:",e); }
+    // Also save to localStorage as backup
     try {
       const existing = await window.storage.get("w2w_results",true).catch(()=>null);
       const all = existing ? JSON.parse(existing.value) : [];
-      all.push({ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData,answers,assetAnswers});
+      all.push(record);
       await window.storage.set("w2w_results",JSON.stringify(all),true);
     } catch(e){ console.error("Storage error:",e); }
   };
