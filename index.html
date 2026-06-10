@@ -857,7 +857,7 @@ function CompanyForm({onNext}) {
       try {
         const res = await fetch("https://sheetdb.io/api/v1/mlwr2ej8jaopu?search[NIT]="+encodeURIComponent(f.nit.replace(/\D/g,"")));
         const data = await res.json();
-        if(data && data.length > 0) {
+        if(Array.isArray(data) && data.length > 0 && data[0].NIT) {
           const fecha = new Date(data[0].Fecha).toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"});
           setNitError("La empresa con NIT "+f.nit+" ya realizó esta evaluación el "+fecha+". Si crees que es un error, contáctanos en info@w2wglobal.com");
           setChecking(false);
@@ -1080,7 +1080,6 @@ function App() {
     </div>
   );
 }
-
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
