@@ -388,47 +388,41 @@ function Results({ans,aAns,co,onRestart}) {
 
   const saveRecord = async(aiData)=>{
     const record = {ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData,answers,assetAnswers};
-    // Save to Google Sheets
+    // Save to SheetDB (Google Sheets)
     try {
-      const co = record.co||{};
-      const ds = record.ds||{};
-      const ai = record.ai||{};
-      const ops = ai.oportunidades||[];
+      const ops = aiData?.oportunidades||[];
       const s = v => typeof v==="string" ? v : String(v||"");
-      const url = "https://script.google.com/macros/s/AKfycbwppn1_GANbfJ9wMXwCzIS5s9v4h5Deo8Ues2COfbA4TwP4BSKMNxfV8D7v9mSnOvTn/exec?" + [
-        "nit="+encodeURIComponent(s(co.nit)),
-        "ts="+encodeURIComponent(record.ts||""),
-        "razonSocial="+encodeURIComponent(s(co.razonSocial)),
-        "ciudad="+encodeURIComponent(s(co.ciudad)),
-        "pais="+encodeURIComponent(s(co.pais)),
-        "employees="+encodeURIComponent(s(co.employees)),
-        "sector="+encodeURIComponent(s(co.sector)),
-        "contactName="+encodeURIComponent(s(co.contactName)),
-        "contactEmail="+encodeURIComponent(s(co.contactEmail)),
-        "score="+encodeURIComponent(record.score||0),
-        "level="+encodeURIComponent(s(record.level)),
-        "diseno="+encodeURIComponent(ds.diseno||0),
-        "materiales="+encodeURIComponent(ds.materiales||0),
-        "energia="+encodeURIComponent(ds.energia||0),
-        "modelos="+encodeURIComponent(ds.modelos||0),
-        "cadena="+encodeURIComponent(ds.cadena||0),
-        "cultura="+encodeURIComponent(ds.cultura||0),
-        "aPct="+encodeURIComponent(record.aPct||0),
-        "interpretacion="+encodeURIComponent(s(ai.interpretacion)),
-        "op1="+encodeURIComponent(typeof ops[0]==="string"?ops[0]:""),
-        "op2="+encodeURIComponent(typeof ops[1]==="string"?ops[1]:""),
-        "op3="+encodeURIComponent(typeof ops[2]==="string"?ops[2]:""),
-        "proximoPaso="+encodeURIComponent(s(ai.proximoPaso))
-      ].join("&");
-      fetch(url, {mode:"no-cors"}).catch(e=>console.error("Sheets:",e));
-    } catch(e){ console.error("Sheets error:",e); }
-    // Also save to localStorage as backup
-    try {
-      const existing = await window.storage.get("w2w_results",true).catch(()=>null);
-      const all = existing ? JSON.parse(existing.value) : [];
-      all.push(record);
-      await window.storage.set("w2w_results",JSON.stringify(all),true);
-    } catch(e){ console.error("Storage error:",e); }
+      const row = {
+        Fecha: record.ts,
+        RazonSocial: s(co.razonSocial),
+        NIT: s(co.nit),
+        Ciudad: s(co.ciudad),
+        Pais: s(co.pais),
+        Empleados: s(co.employees),
+        Sector: s(co.sector),
+        Contacto: s(co.contactName),
+        Email: s(co.contactEmail),
+        Score: score,
+        Nivel: lv.name,
+        Diseno: ds.diseno||0,
+        Materiales: ds.materiales||0,
+        Energia: ds.energia||0,
+        Modelos: ds.modelos||0,
+        Cadena: ds.cadena||0,
+        Cultura: ds.cultura||0,
+        Activos: aPct,
+        Interpretacion: s(aiData?.interpretacion),
+        Oportunidad1: typeof ops[0]==="string"?ops[0]:"",
+        Oportunidad2: typeof ops[1]==="string"?ops[1]:"",
+        Oportunidad3: typeof ops[2]==="string"?ops[2]:"",
+        ProximoPaso: s(aiData?.proximoPaso)
+      };
+      await fetch("https://sheetdb.io/api/v1/mlwr2ej8jaopu", {
+        method: "POST",
+        headers: {"Content-Type":"application/json","Accept":"application/json"},
+        body: JSON.stringify({data: [row]})
+      });
+    } catch(e){ console.error("SheetDB error:",e); }
   };
 
   useEffect(()=>{
@@ -650,6 +644,7 @@ function Admin({onBack}) {
   const [recs,setRecs]=useState([]);
   const [sel,setSel]=useState(null);
   const [err,setErr]=useState("");
+  const [loading,setLoading]=useState(false);
 
   const PASS = "W2W2024";
 
@@ -662,10 +657,36 @@ function Admin({onBack}) {
     else { setErr("Contraseña incorrecta. Intenta de nuevo."); }
   };
   const load=async()=>{
+    setLoading(true);
     try{
-      const r=await window.storage.get("w2w_results",true);
-      if(r) setRecs(JSON.parse(r.value));
-    }catch(e){ console.error(e); }
+      const res = await fetch("https://sheetdb.io/api/v1/mlwr2ej8jaopu");
+      const data = await res.json();
+      // Convert SheetDB flat rows back to record format
+      const records = data.map(r=>({
+        ts: r.Fecha||"",
+        co:{
+          razonSocial:r.RazonSocial||"", nit:r.NIT||"",
+          ciudad:r.Ciudad||"", pais:r.Pais||"",
+          employees:r.Empleados||"", sector:r.Sector||"",
+          contactName:r.Contacto||"", contactEmail:r.Email||""
+        },
+        score: Number(r.Score)||0,
+        level: r.Nivel||"",
+        ds:{
+          diseno:Number(r.Diseno)||0, materiales:Number(r.Materiales)||0,
+          energia:Number(r.Energia)||0, modelos:Number(r.Modelos)||0,
+          cadena:Number(r.Cadena)||0, cultura:Number(r.Cultura)||0
+        },
+        aPct: Number(r.Activos)||0,
+        ai:{
+          interpretacion: r.Interpretacion||"",
+          oportunidades: [r.Oportunidad1||"", r.Oportunidad2||"", r.Oportunidad3||""],
+          proximoPaso: r.ProximoPaso||""
+        }
+      }));
+      setRecs(records);
+    }catch(e){ console.error("SheetDB load error:",e); }
+    setLoading(false);
   };
   const csv=()=>{
     const h=["Fecha","Empresa","NIT","Ciudad","Empleados","Sector","Email","Score","Nivel",...DIMS.map(d=>d.name),"Activos%","Interpretación","Oportunidad 1","Oportunidad 2","Oportunidad 3","Próximo Paso"];
@@ -833,17 +854,16 @@ function CompanyForm({onNext}) {
     setChecking(true);
     setNitError(null);
     try {
-      const existing = await window.storage.get("w2w_results",true).catch(()=>null);
-      if(existing) {
-        const all = JSON.parse(existing.value);
-        const dup = all.find(r => r.co?.nit && r.co.nit.replace(/\D/g,"") === f.nit.replace(/\D/g,""));
-        if(dup) {
-          const fecha = new Date(dup.ts).toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"});
-          setNitError("La empresa con NIT "+f.nit+" ya realizó esta evaluación el "+fecha+". Si crees que es un error, contáctanos.");
+      try {
+        const res = await fetch("https://sheetdb.io/api/v1/mlwr2ej8jaopu?search[NIT]="+encodeURIComponent(f.nit.replace(/\D/g,"")));
+        const data = await res.json();
+        if(data && data.length > 0) {
+          const fecha = new Date(data[0].Fecha).toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"});
+          setNitError("La empresa con NIT "+f.nit+" ya realizó esta evaluación el "+fecha+". Si crees que es un error, contáctanos en info@w2wglobal.com");
           setChecking(false);
           return;
         }
-      }
+      } catch(e){ console.error("NIT check error:",e); }
     } catch(e){ console.error(e); }
     setChecking(false);
     onNext(f);
