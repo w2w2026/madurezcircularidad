@@ -387,7 +387,7 @@ function Results({ans,aAns,co,onRestart}) {
   const aPct=Math.round((aSc/(AQS.length*3))*100);
 
   const saveRecord = async(aiData)=>{
-    const record = {ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData,answers,assetAnswers};
+    const record = {ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData};
     // Save to SheetDB (Google Sheets)
     try {
       const ops = aiData?.oportunidades||[];
@@ -431,7 +431,7 @@ function Results({ans,aAns,co,onRestart}) {
       try {
         const prompt = `Eres experto en economía circular. Empresa sector "${co.sector||"N/A"}", ${co.employees||"N/A"} empleados. Score ${score}/100, nivel ${lv.name}. Dimensiones: ${DIMS.map(d=>d.name+":"+ds[d.id]).join(", ")}. Responde SOLO con JSON válido sin markdown. Exactamente: {"interpretacion":"string 70 palabras","oportunidades":["string1","string2","string3"],"proximoPaso":"string"}. Los valores de oportunidades deben ser strings simples, no objetos.`;
         const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
-          headers:{"Content-Type":"application/json"},
+          headers:{"Content-Type":"application/json","anthropic-dangerous-allow-browser":"true"},
           body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,
             messages:[{role:"user",content:prompt}]})});
         const data=await res.json();
