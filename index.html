@@ -416,11 +416,12 @@ function Results({ans,aAns,co,onRestart}) {
         Oportunidad3: typeof ops[2]==="string"?ops[2]:"",
         ProximoPaso: s(aiData?.proximoPaso)
       };
-      await fetch("https://sheetdb.io/api/v1/mlwr2ej8jaopu", {
+      const res = await fetch("https://sheetdb.io/api/v1/mlwr2ej8jaopu", {
         method: "POST",
         headers: {"Content-Type":"application/json","Accept":"application/json"},
-        body: JSON.stringify({data: [row]})
+        body: JSON.stringify({data: row})
       });
+      console.log("SheetDB status:", res.status);
     } catch(e){ console.error("SheetDB error:",e); }
   };
 
@@ -537,16 +538,47 @@ function Results({ans,aAns,co,onRestart}) {
       )}
 
       {/* Scale */}
+      {/* Journey Scale */}
       <div style={css.card}>
-        <div style={css.secLbl}>Escala de Madurez</div>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-          {LEVELS.map(l=>(
-            <div key={l.name} style={{flex:1,minWidth:85,padding:"9px 10px",borderRadius:10,textAlign:"center",
-              background:l.name===lv.name?l.color:l.color+"33",border:`2px solid ${l.name===lv.name?l.color:"transparent"}`}}>
-              <div style={{fontSize:10.5,fontWeight:800,color:l.name===lv.name?P.dark:P.txt2}}>{l.name}</div>
-              <div style={{fontSize:9,color:P.txt2,marginTop:1}}>{l.range[0]}–{l.range[1]}</div>
-            </div>
-          ))}
+        <div style={css.secLbl}>Tu Viaje en la Economía Circular</div>
+        <div style={{position:"relative",marginTop:12,paddingBottom:8}}>
+          {/* Timeline line */}
+          <div style={{position:"absolute",top:26,left:"10%",right:"10%",height:3,background:`linear-gradient(90deg,${P.salmon},${P.cream},${P.tealL},${P.teal},${P.sage})`,borderRadius:2,zIndex:0}}/>
+          <div style={{display:"flex",justifyContent:"space-between",position:"relative",zIndex:1}}>
+            {LEVELS.map((l,i)=>{
+              const isCurrent = l.name===lv.name;
+              const isPast = i < LEVELS.findIndex(x=>x.name===lv.name);
+              const times = ["Año 1","Año 1-2","Año 2-3","Año 3-4","Año 4+"];
+              const emojis = ["😐","🌱","⚙️","🔗","🚀"];
+              return(
+                <div key={l.name} onClick={()=>isCurrent&&setShowLevel(v=>!v)}
+                  style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",cursor:isCurrent?"pointer":"default",padding:"0 4px"}}>
+                  {/* Circle */}
+                  <div style={{
+                    width:isCurrent?54:34, height:isCurrent?54:34,
+                    borderRadius:"50%",
+                    background:isCurrent?l.color:isPast?l.color+"99":l.color+"30",
+                    border:`3px solid ${isCurrent?l.color:isPast?l.color+"99":"#ddd"}`,
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    boxShadow:isCurrent?`0 4px 18px ${l.color}77`:"none",
+                    position:"relative",marginBottom:6,transition:"all 0.3s",
+                  }}>
+                    {isCurrent&&(
+                      <div style={{position:"absolute",top:-8,left:"50%",transform:"translateX(-50%)",background:P.dark,color:P.white,borderRadius:8,fontSize:8,fontWeight:800,padding:"2px 6px",whiteSpace:"nowrap"}}>TÚ ESTÁS AQUÍ</div>
+                    )}
+                    <span style={{fontSize:isCurrent?20:12}}>{emojis[i]}</span>
+                  </div>
+                  {/* Name */}
+                  <div style={{fontSize:isCurrent?11:9.5,fontWeight:800,color:isCurrent?l.color:isPast?P.txt2:"#ccc",textAlign:"center",marginBottom:1}}>{l.name}</div>
+                  {/* Range */}
+                  <div style={{fontSize:8.5,color:isCurrent?P.txt:isPast?P.txt2:"#ccc",marginBottom:1}}>{l.range[0]}–{l.range[1]} pts</div>
+                  {/* Time badge */}
+                  <div style={{fontSize:8,fontWeight:700,color:isCurrent?P.white:isPast?P.txt2:"#ccc",background:isCurrent?l.color:isPast?l.color+"33":"#f0f0f0",padding:"1px 6px",borderRadius:8,marginTop:1}}>{times[i]}</div>
+                  {isCurrent&&<div style={{fontSize:9,color:P.teal,marginTop:4,fontWeight:600}}>clic para ver más ▼</div>}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
