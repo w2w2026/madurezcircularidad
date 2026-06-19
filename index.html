@@ -189,6 +189,10 @@ const QS = [
    tip:"¿Tienen gestores o aliados certificados que reciben sus residuos? ¿Saben qué pasa con los materiales después de que salen de su operación?",
    opts:OPT5("No sabemos qué pasa con nuestros residuos","Se entregan a terceros sin verificar su destino","Algunos residuos van a gestores certificados","La mayoría de residuos tienen ruta de valorización verificada","Todos los residuos tienen ruta de valorización certificada y trazable")},
   // ENERGÍA
+  {id:"e0",dim:"energia",
+   text:"¿Su organización mide su consumo de agua y tiene objetivos de eficiencia o reducción en su uso?",
+   tip:"Considera el agua utilizada en procesos productivos, instalaciones, servicios y cualquier actividad operativa.",
+   opts:OPT5("No se mide","Se mide sin objetivos","Se mide con objetivos informales","Objetivos formales con seguimiento","Programa robusto con metas de reducción y reutilización")},
   {id:"e1",dim:"energia",
    text:"¿Su organización mide su consumo de energía y tiene objetivos de eficiencia o reducción?",
    opts:OPT5("No se mide","Se mide sin objetivos","Se mide con objetivos informales","Objetivos formales con seguimiento","Meta de carbono neutro o energía 100% renovable")},
@@ -538,47 +542,58 @@ function Results({ans,aAns,co,onRestart}) {
       )}
 
       {/* Scale */}
-      {/* Journey Scale */}
+      {/* Staircase Scale */}
       <div style={css.card}>
         <div style={css.secLbl}>Tu Viaje en la Economía Circular</div>
-        <div style={{position:"relative",marginTop:12,paddingBottom:8}}>
-          {/* Timeline line */}
-          <div style={{position:"absolute",top:26,left:"10%",right:"10%",height:3,background:`linear-gradient(90deg,${P.salmon},${P.cream},${P.tealL},${P.teal},${P.sage})`,borderRadius:2,zIndex:0}}/>
-          <div style={{display:"flex",justifyContent:"space-between",position:"relative",zIndex:1}}>
-            {LEVELS.map((l,i)=>{
-              const isCurrent = l.name===lv.name;
-              const isPast = i < LEVELS.findIndex(x=>x.name===lv.name);
-              const times = ["Año 1","Año 1-2","Año 2-3","Año 3-4","Año 4+"];
-              const emojis = ["😐","🌱","⚙️","🔗","🚀"];
-              return(
-                <div key={l.name} onClick={()=>isCurrent&&setShowLevel(v=>!v)}
-                  style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",cursor:isCurrent?"pointer":"default",padding:"0 4px"}}>
-                  {/* Circle */}
-                  <div style={{
-                    width:isCurrent?54:34, height:isCurrent?54:34,
-                    borderRadius:"50%",
-                    background:isCurrent?l.color:isPast?l.color+"99":l.color+"30",
-                    border:`3px solid ${isCurrent?l.color:isPast?l.color+"99":"#ddd"}`,
-                    display:"flex",alignItems:"center",justifyContent:"center",
-                    boxShadow:isCurrent?`0 4px 18px ${l.color}77`:"none",
-                    position:"relative",marginBottom:6,transition:"all 0.3s",
-                  }}>
-                    {isCurrent&&(
-                      <div style={{position:"absolute",top:-8,left:"50%",transform:"translateX(-50%)",background:P.dark,color:P.white,borderRadius:8,fontSize:8,fontWeight:800,padding:"2px 6px",whiteSpace:"nowrap"}}>TÚ ESTÁS AQUÍ</div>
-                    )}
-                    <span style={{fontSize:isCurrent?20:12}}>{emojis[i]}</span>
+        <div style={{position:"relative",height:220,marginTop:16}}>
+          {LEVELS.map((l,i)=>{
+            const isCurrent = l.name===lv.name;
+            const isPast = i < LEVELS.findIndex(x=>x.name===lv.name);
+            const times = ["Año 1","Año 1-2","Año 2-3","Año 3-4","Año 4+"];
+            const stepW = 18; // % width per step
+            const stepH = [40,80,120,160,200]; // height of each step
+            const left = i * 20; // % from left
+            const bottom = i * 36; // px from bottom
+            const isActive = isCurrent || isPast;
+            return(
+              <div key={l.name}
+                onClick={()=>isCurrent&&setShowLevel(v=>!v)}
+                style={{
+                  position:"absolute",
+                  left:`${left}%`,
+                  bottom:0,
+                  width:"19%",
+                  height: bottom + 80,
+                  background: isActive ? l.color : l.color+"28",
+                  borderRadius:"6px 6px 0 0",
+                  cursor:isCurrent?"pointer":"default",
+                  transition:"all 0.3s",
+                  boxShadow: isCurrent ? `0 -4px 20px ${l.color}66` : "none",
+                  border: isCurrent ? `2px solid ${l.color}` : "none",
+                  display:"flex",
+                  flexDirection:"column",
+                  alignItems:"center",
+                  justifyContent:"flex-start",
+                  paddingTop:10,
+                }}>
+                {/* "Tú aquí" tag */}
+                {isCurrent&&(
+                  <div style={{position:"absolute",top:-28,left:"50%",transform:"translateX(-50%)",background:P.dark,color:P.white,borderRadius:8,fontSize:8,fontWeight:800,padding:"3px 7px",whiteSpace:"nowrap",zIndex:2}}>
+                    ★ TÚ ESTÁS AQUÍ
                   </div>
-                  {/* Name */}
-                  <div style={{fontSize:isCurrent?11:9.5,fontWeight:800,color:isCurrent?l.color:isPast?P.txt2:"#ccc",textAlign:"center",marginBottom:1}}>{l.name}</div>
-                  {/* Range */}
-                  <div style={{fontSize:8.5,color:isCurrent?P.txt:isPast?P.txt2:"#ccc",marginBottom:1}}>{l.range[0]}–{l.range[1]} pts</div>
-                  {/* Time badge */}
-                  <div style={{fontSize:8,fontWeight:700,color:isCurrent?P.white:isPast?P.txt2:"#ccc",background:isCurrent?l.color:isPast?l.color+"33":"#f0f0f0",padding:"1px 6px",borderRadius:8,marginTop:1}}>{times[i]}</div>
-                  {isCurrent&&<div style={{fontSize:9,color:P.teal,marginTop:4,fontWeight:600}}>clic para ver más ▼</div>}
-                </div>
-              );
-            })}
-          </div>
+                )}
+                {/* Level name */}
+                <div style={{fontSize:9,fontWeight:800,color:isActive?P.dark:"#bbb",textAlign:"center",letterSpacing:0.5,marginBottom:3}}>{l.name}</div>
+                {/* Points */}
+                <div style={{fontSize:8,color:isActive?P.dark+"99":"#ccc",textAlign:"center"}}>{l.range[0]}–{l.range[1]}</div>
+                {/* Time badge at bottom */}
+                <div style={{position:"absolute",bottom:6,fontSize:7.5,fontWeight:700,color:isActive?P.dark+"88":"#ccc",textAlign:"center",padding:"1px 4px",borderRadius:4,background:isActive?"rgba(255,255,255,0.4)":"transparent"}}>{times[i]}</div>
+                {isCurrent&&<div style={{fontSize:8,color:P.dark,marginTop:3,fontWeight:600}}>ver más ▼</div>}
+              </div>
+            );
+          })}
+          {/* Arrow indicating direction */}
+          <div style={{position:"absolute",right:8,bottom:8,fontSize:11,color:P.sage,fontWeight:700}}>→ Mejora continua</div>
         </div>
       </div>
 
@@ -914,7 +929,7 @@ function CompanyForm({onNext}) {
             Basado en el marco de la <strong style={{color:P.cream}}>Ellen MacArthur Foundation</strong>, evalúa tu nivel de madurez circular en 6 dimensiones y obtén insights personalizados.
           </p>
           <div style={{display:"flex",gap:16,marginTop:14,flexWrap:"wrap"}}>
-            {[["⏱","15-20 min"],["📋","25 preguntas"],["📊","Resultados inmediatos"]].map(([ic,lb])=>(
+            {[["⏱","15-20 min"],["📋","31 preguntas"],["📊","Resultados inmediatos"]].map(([ic,lb])=>(
               <span key={lb} style={{display:"flex",alignItems:"center",gap:5,color:P.teal,fontSize:12}}>{ic} {lb}</span>
             ))}
           </div>
@@ -1057,7 +1072,7 @@ function App() {
                 Conoce el nivel de madurez circular de tu organización, identifica oportunidades de mejora y descubre cómo la economía circular puede generar valor para tu negocio. <strong style={{color:P.cream}}>No hay respuestas correctas ni incorrectas</strong> — entre más honesto seas con tu situación actual, más útil será el resultado.
               </p>
               <div style={{display:"flex",gap:20,justifyContent:"center",flexWrap:"wrap",marginBottom:32}}>
-                {[["⏱","15-20 minutos"],["📋","31 preguntas"],["📊","Resultados inmediatos"],["🎯","100% confidencial"]].map(([ic,lb])=>(
+                {[["⏱","15-20 minutos"],["📋","31 preguntas"],["📊","Resultados inmediatos"],["🌱","Marco Ellen MacArthur"]].map(([ic,lb])=>(
                   <div key={lb} style={{display:"flex",alignItems:"center",gap:6,color:P.teal,fontSize:13}}>
                     <span>{ic}</span><span>{lb}</span>
                   </div>
@@ -1088,7 +1103,6 @@ function App() {
               <button onClick={()=>setPage("form")} style={{...css.btn,fontSize:16,padding:"15px 48px"}}>
                 Comenzar Evaluación →
               </button>
-              <p style={{fontSize:12,color:P.txt2,marginTop:10}}>Al continuar aceptas el tratamiento de tus datos según la Ley 1581 de 2012</p>
             </div>
           </div>
         )}
