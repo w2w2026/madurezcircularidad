@@ -269,8 +269,8 @@ const AQS = [
 ];
 const AOPTS = ["No / No lo hemos analizado","Posiblemente, sin análisis formal","Sí, hemos identificado oportunidades","Sí, tenemos un plan concreto"];
 
-const PAGES = ["form","diseno","materiales","energia","modelos","cadena","cultura","assets","results"];
-const PLABELS = ["Empresa","Diseño","Materiales","Energía","Modelos","Cadena","Cultura","Activos","Resultados"];
+const PAGES = ["welcome","form","diseno","materiales","energia","modelos","cadena","cultura","assets","results"];
+const PLABELS = ["Inicio","Empresa","Diseño","Materiales","Energía","Modelos","Cadena","Cultura","Activos","Resultados"];
 const DDESC = {
   diseno:"Evalúa cómo incorpora principios de diseño circular en sus productos o servicios.",
   materiales:"Analiza la gestión de materiales, residuos y vida útil de activos.",
@@ -901,24 +901,6 @@ function CompanyForm({onNext}) {
   };
   return (
     <div>
-      {/* Video intro */}
-      <div style={{...css.card,padding:0,overflow:"hidden",marginBottom:16}}>
-        <div style={{background:P.dark,padding:"16px 24px 12px"}}>
-          <div style={{fontSize:10.5,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:P.teal,marginBottom:4}}>Antes de comenzar</div>
-          <p style={{color:P.white,fontSize:14,fontWeight:600,margin:0}}>Conoce quiénes somos y qué hacemos en Waste 2 Worth</p>
-        </div>
-        <div style={{position:"relative",paddingBottom:"56.25%",height:0,overflow:"hidden"}}>
-          <iframe
-            src="https://www.youtube.com/embed/d0-oAcO3lrs"
-            title="Waste 2 Worth"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            style={{position:"absolute",top:0,left:0,width:"100%",height:"100%"}}
-          />
-        </div>
-      </div>
-
       <div style={{background:P.dark,borderRadius:13,padding:"36px 32px",marginBottom:16,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-20,right:-20,width:150,height:150,background:P.teal,borderRadius:"50%",opacity:.09}}/>
         <div style={{position:"absolute",bottom:-16,left:-16,width:110,height:110,background:P.cream,borderRadius:"50%",opacity:.08}}/>
@@ -1012,7 +994,7 @@ function CompanyForm({onNext}) {
 
 // ── MAIN APP ──────────────────────────────────────────────────
 function App() {
-  const [page,setPage]=useState("form");
+  const [page,setPage]=useState("welcome");
   const [co,setCo]=useState(null);
   const [ans,setAns]=useState({});
   const [aAns,setAAns]=useState({});
@@ -1050,9 +1032,61 @@ function App() {
           </p>
         </div>
       )}
-      {page!=="form"&&page!=="results"&&<Progress step={step}/>}
+      {page!=="welcome"&&page!=="form"&&page!=="results"&&<Progress step={step}/>}
 
       <div style={css.wrap}>
+        {page==="welcome"&&(
+          <div>
+            {/* Welcome Hero */}
+            <div style={{background:P.dark,borderRadius:13,padding:"48px 36px",marginBottom:18,position:"relative",overflow:"hidden",textAlign:"center"}}>
+              <div style={{position:"absolute",top:0,right:0,width:200,height:200,background:P.teal,borderRadius:"0 0 0 100%",opacity:.08}}/>
+              <div style={{position:"absolute",bottom:0,left:0,width:150,height:150,background:P.cream,borderRadius:"0 100% 0 0",opacity:.07}}/>
+              <div style={{display:"flex",justifyContent:"center",marginBottom:24}}>
+                <Logo onDark/>
+              </div>
+              <div style={{fontSize:11,letterSpacing:2.5,color:P.teal,textTransform:"uppercase",marginBottom:10}}>Evaluación de Madurez Circular Empresarial</div>
+              <h1 style={{fontSize:28,fontWeight:900,color:P.white,marginBottom:18,fontFamily:"'Playfair Display',serif",lineHeight:1.3,maxWidth:600,margin:"0 auto 18px"}}>
+                ¿En qué punto está tu organización frente a la economía circular?
+              </h1>
+              <p style={{color:"#A8C4C0",fontSize:15,lineHeight:1.8,maxWidth:580,margin:"0 auto 28px"}}>
+                Conoce el nivel de madurez circular de tu organización, identifica oportunidades de mejora y descubre cómo la economía circular puede generar valor para tu negocio. <strong style={{color:P.cream}}>No hay respuestas correctas ni incorrectas</strong> — entre más honesto seas con tu situación actual, más útil será el resultado.
+              </p>
+              <div style={{display:"flex",gap:20,justifyContent:"center",flexWrap:"wrap",marginBottom:32}}>
+                {[["⏱","15-20 minutos"],["📋","31 preguntas"],["📊","Resultados inmediatos"],["🎯","100% confidencial"]].map(([ic,lb])=>(
+                  <div key={lb} style={{display:"flex",alignItems:"center",gap:6,color:P.teal,fontSize:13}}>
+                    <span>{ic}</span><span>{lb}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Video */}
+            <div style={{...css.card,padding:0,overflow:"hidden",marginBottom:18}}>
+              <div style={{background:P.dark,padding:"14px 22px 12px"}}>
+                <div style={{fontSize:10,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:P.teal,marginBottom:3}}>Conócenos</div>
+                <p style={{color:P.white,fontSize:14,fontWeight:600,margin:0}}>¿Quiénes somos y qué hacemos en Waste 2 Worth?</p>
+              </div>
+              <div style={{position:"relative",paddingBottom:"56.25%",height:0,overflow:"hidden"}}>
+                <iframe
+                  src="https://www.youtube.com/embed/d0-oAcO3lrs"
+                  title="Waste 2 Worth"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{position:"absolute",top:0,left:0,width:"100%",height:"100%"}}
+                />
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div style={{textAlign:"center",marginBottom:32}}>
+              <button onClick={()=>setPage("form")} style={{...css.btn,fontSize:16,padding:"15px 48px"}}>
+                Comenzar Evaluación →
+              </button>
+              <p style={{fontSize:12,color:P.txt2,marginTop:10}}>Al continuar aceptas el tratamiento de tus datos según la Ley 1581 de 2012</p>
+            </div>
+          </div>
+        )}
         {page==="form"&&<CompanyForm onNext={d=>{setCo(d);setPage("diseno");}}/>}
 
         {isDim&&(
