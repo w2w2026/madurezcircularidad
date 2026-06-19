@@ -752,7 +752,9 @@ function Admin({onBack}) {
   return (
     <div style={{minHeight:"100vh",background:P.bg}}>
       <div style={css.hdr}>
-        <Logo small onDark/>
+        <div onClick={()=>{const n=logoClicks+1;setLogoClicks(n);if(n>=5){setPage("admin");setLogoClicks(0);}}}>
+          <Logo small onDark/>
+        </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <span style={{color:P.tealL,fontSize:12}}>{recs.length} registros</span>
           <button onClick={csv} style={{...css.btnT,padding:"6px 14px",fontSize:12}}>📥 Exportar CSV</button>
@@ -994,11 +996,12 @@ function CompanyForm({onNext}) {
 
 // ── MAIN APP ──────────────────────────────────────────────────
 function App() {
-  const [page,setPage]=useState("welcome");
+  const [page,setPage]=useState(window.location.hash==="#admin"?"admin":"welcome");
   const [co,setCo]=useState(null);
   const [ans,setAns]=useState({});
   const [aAns,setAAns]=useState({});
   const [showContact,setShowContact]=useState(false);
+  const [logoClicks,setLogoClicks]=useState(0);
   const step=PAGES.indexOf(page);
   const isDim=["diseno","materiales","energia","modelos","cadena","cultura"].includes(page);
   const dimQs=isDim?QS.filter(q=>q.dim===page):[];
@@ -1017,10 +1020,12 @@ function App() {
     <div style={css.app}>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
       <div style={css.hdr}>
-        <Logo small onDark/>
+        <div onClick={()=>{const n=logoClicks+1;setLogoClicks(n);if(n>=5){setPage("admin");setLogoClicks(0);}}}>
+          <Logo small onDark/>
+        </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <button onClick={()=>setShowContact(c=>!c)} style={{background:"none",border:`1px solid ${P.teal}`,color:P.teal,padding:"4px 11px",borderRadius:6,fontSize:11,fontWeight:600,cursor:"pointer"}}>✉ Contáctanos</button>
-          <button onClick={()=>setPage("admin")} style={{background:"none",border:`1px solid ${P.teal}`,color:P.teal,padding:"4px 11px",borderRadius:6,fontSize:11,cursor:"pointer"}}>Admin</button>
+
         </div>
       </div>
 
