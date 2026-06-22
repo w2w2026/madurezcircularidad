@@ -1095,6 +1095,17 @@ function App() {
       )}
       {page!=="welcome"&&page!=="form"&&page!=="results"&&<Progress step={step}/>}
 
+      {/* Floating scroll to top button */}
+      <button
+        onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}
+        style={{position:"fixed",bottom:24,right:24,width:44,height:44,borderRadius:"50%",
+          background:P.dark,color:P.white,border:`2px solid ${P.teal}`,
+          fontSize:18,cursor:"pointer",zIndex:999,
+          boxShadow:"0 4px 14px rgba(41,54,59,0.3)",
+          display:"flex",alignItems:"center",justifyContent:"center"}}>
+        ↑
+      </button>
+
       <div style={css.wrap}>
         {page==="welcome"&&(
           <div>
@@ -1159,10 +1170,10 @@ function App() {
             </div>
             {dimQs.map((q,i)=><QCard key={q.id} q={q} val={ans[q.id]} onChange={v=>setAns(a=>({...a,[q.id]:v}))} idx={qOffset()+i+1}/>)}
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:28}}>
-              <button onClick={()=>setPage(PAGES[step-1])} style={css.btnO}>← Anterior</button>
+              <button onClick={()=>{setPage(PAGES[step-1]);window.scrollTo({top:0,behavior:"smooth"});}} style={css.btnO}>← Anterior</button>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 {!dimDone&&<span style={{fontSize:12,color:P.warn}}>Responde todas las preguntas</span>}
-                <button onClick={()=>dimDone&&setPage(PAGES[step+1])} style={{...css.btn,opacity:dimDone?1:.45}}>Siguiente →</button>
+                <button onClick={()=>{if(dimDone){setPage(PAGES[step+1]);window.scrollTo({top:0,behavior:"smooth"});}}} style={{...css.btn,opacity:dimDone?1:.45}}>Siguiente →</button>
               </div>
             </div>
           </div>
@@ -1194,8 +1205,8 @@ function App() {
               </div>
             ))}
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:28}}>
-              <button onClick={()=>setPage(PAGES[step-1])} style={css.btnO}>← Anterior</button>
-              <button onClick={()=>setPage("results")} style={css.btnT}>Ver Resultados →</button>
+              <button onClick={()=>{setPage(PAGES[step-1]);window.scrollTo({top:0,behavior:"smooth"});}} style={css.btnO}>← Anterior</button>
+              <button onClick={()=>{setPage("results");window.scrollTo({top:0,behavior:"smooth"});}} style={css.btnT}>Ver Resultados →</button>
             </div>
           </div>
         )}
