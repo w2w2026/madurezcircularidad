@@ -390,10 +390,10 @@ function Results({ans,aAns,co,onRestart}) {
   const aPct=Math.round((aSc/(AQS.length*3))*100);
 
   const saveRecord = async(aiData)=>{
-    const record = {ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData};
-    // Save to SheetDB (Google Sheets)
+    const record = {ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData||{}};
+    // Save to SheetDB immediately
     try {
-      const ops = aiData?.oportunidades||[];
+      const ops = (aiData?.oportunidades)||[];
       const s = v => typeof v==="string" ? v : String(v||"");
       const row = {
         Fecha: record.ts,
@@ -430,6 +430,9 @@ function Results({ans,aAns,co,onRestart}) {
   };
 
   useEffect(()=>{
+    // 1. Save to SheetDB immediately - no AI needed
+    saveRecord(null);
+    // 2. Generate AI analysis separately
     (async()=>{
       let aiData;
       try {
@@ -449,7 +452,6 @@ function Results({ans,aAns,co,onRestart}) {
         };
       }
       setAi(aiData);
-      await saveRecord(aiData);
     })();
   },[]);
 
@@ -592,9 +594,8 @@ function Results({ans,aAns,co,onRestart}) {
               </div>
             );
           })}
-          {/* Arrow indicating direction */}
-          <div style={{position:"absolute",right:8,bottom:8,fontSize:11,color:P.sage,fontWeight:700}}>→ Mejora continua</div>
         </div>
+        <div style={{textAlign:"right",marginTop:8,fontSize:11,color:P.sage,fontWeight:700}}>→ Mejora continua</div>
       </div>
 
       {/* Dims + radar */}
