@@ -923,20 +923,18 @@ function CompanyForm({onNext}) {
     if(!ok||!consent) return;
     setChecking(true);
     setNitError(null);
+    // NIT duplicate check via localStorage only
     try {
-      // NIT duplicate check via localStorage only
-      try {
-        const stored = localStorage.getItem("w2w_nits_used");
-        const nitsUsed = stored ? JSON.parse(stored) : [];
-        const nitClean = f.nit.replace(/\D/g,"");
-        const dup = nitsUsed.find(n => n.nit === nitClean);
-        if(dup) {
-          setNitError("La empresa con NIT "+f.nit+" ya realizó esta evaluación el "+dup.fecha+". Si crees que es un error, contáctanos en info@w2wglobal.com");
-          setChecking(false);
-          return;
-        }
-      } catch(e){ console.error("NIT check error:",e); }
-    } catch(e){ console.error(e); }
+      const stored = localStorage.getItem("w2w_nits_used");
+      const nitsUsed = stored ? JSON.parse(stored) : [];
+      const nitClean = f.nit.replace(/\D/g,"");
+      const dup = nitsUsed.find(n => n.nit === nitClean);
+      if(dup) {
+        setNitError("La empresa con NIT "+f.nit+" ya realizó esta evaluación el "+dup.fecha+". Si crees que es un error, contáctanos en info@w2wglobal.com");
+        setChecking(false);
+        return;
+      }
+    } catch(e){ console.error("NIT check error:",e); }
     setChecking(false);
     onNext(f);
   };
