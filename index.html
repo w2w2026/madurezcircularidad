@@ -438,6 +438,16 @@ function Results({ans,aAns,co,onRestart}) {
       });
       console.log("SheetDB status:", res.status);
     } catch(e){ console.error("SheetDB error:",e); }
+    // Save NIT to localStorage to prevent duplicates
+    try {
+      const stored = localStorage.getItem("w2w_nits_used");
+      const nitsUsed = stored ? JSON.parse(stored) : [];
+      const nitClean = (co.nit||"").replace(/\D/g,"");
+      if(nitClean && !nitsUsed.find(n=>n.nit===nitClean)) {
+        nitsUsed.push({nit:nitClean, fecha:new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"})});
+        localStorage.setItem("w2w_nits_used", JSON.stringify(nitsUsed));
+      }
+    } catch(e){}
   };
 
   useEffect(()=>{
@@ -914,13 +924,14 @@ function CompanyForm({onNext}) {
     setChecking(true);
     setNitError(null);
     try {
+      // NIT duplicate check via localStorage only
       try {
+        const stored = localStorage.getItem("w2w_nits_used");
+        const nitsUsed = stored ? JSON.parse(stored) : [];
         const nitClean = f.nit.replace(/\D/g,"");
-        const res = await fetch("https://sheetdb.io/api/v1/mlwr2ej8jaopu?search[NIT]="+encodeURIComponent(nitClean));
-        const data = await res.json();
-        if(Array.isArray(data) && data.length > 0 && data[0].NIT && data[0].NIT.replace(/\D/g,"")===nitClean) {
-          const fecha = new Date(data[0].Fecha).toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"});
-          setNitError("La empresa con NIT "+f.nit+" ya realizó esta evaluación el "+fecha+". Si crees que es un error, contáctanos en info@w2wglobal.com");
+        const dup = nitsUsed.find(n => n.nit === nitClean);
+        if(dup) {
+          setNitError("La empresa con NIT "+f.nit+" ya realizó esta evaluación el "+dup.fecha+". Si crees que es un error, contáctanos en info@w2wglobal.com");
           setChecking(false);
           return;
         }
