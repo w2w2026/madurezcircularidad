@@ -34,16 +34,10 @@ const P = {
 
 // ── LOGO ─────────────────────────────────────────────────────
 const Logo = ({ small, onDark }) => {
-  const wordStyle = {fontFamily:"'DM Sans',sans-serif",fontWeight:800,fontSize:small?13:20,letterSpacing:2,color:onDark?P.cream:P.dark,textTransform:"uppercase"};
-  const numStyle  = {fontFamily:"'DM Sans',sans-serif",fontWeight:900,fontSize:small?18:28,color:P.teal,lineHeight:1,margin:"0 3px"};
-  const subStyle  = {fontSize:9,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:onDark?P.tealL:P.sage,fontFamily:"'DM Sans',sans-serif"};
+  const subStyle = {fontSize:9,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:onDark?P.tealL:P.sage,fontFamily:"'DM Sans',sans-serif"};
   return (
     <div style={{display:"flex",alignItems:"center",gap:small?8:14}}>
-      <div style={{display:"flex",alignItems:"baseline",gap:3}}>
-        <span style={wordStyle}>WASTE</span>
-        <span style={numStyle}>2</span>
-        <span style={wordStyle}>WORTH</span>
-      </div>
+      <img src="logo.png" alt="Waste 2 Worth" style={{height:small?32:48,width:"auto",display:"block"}}/>
       {!small && (
         <div style={{borderLeft:"2px solid #88C3B666",paddingLeft:11,lineHeight:1.4}}>
           <div style={subStyle}>Evaluación de Madurez</div>
