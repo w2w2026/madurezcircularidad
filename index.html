@@ -915,9 +915,10 @@ function CompanyForm({onNext}) {
     setNitError(null);
     try {
       try {
-        const res = await fetch("https://sheetdb.io/api/v1/mlwr2ej8jaopu?search[NIT]="+encodeURIComponent(f.nit.replace(/\D/g,"")));
+        const nitClean = f.nit.replace(/\D/g,"");
+        const res = await fetch("https://sheetdb.io/api/v1/mlwr2ej8jaopu?search[NIT]="+encodeURIComponent(nitClean));
         const data = await res.json();
-        if(Array.isArray(data) && data.length > 0 && data[0].NIT) {
+        if(Array.isArray(data) && data.length > 0 && data[0].NIT && data[0].NIT.replace(/\D/g,"")===nitClean) {
           const fecha = new Date(data[0].Fecha).toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"});
           setNitError("La empresa con NIT "+f.nit+" ya realizó esta evaluación el "+fecha+". Si crees que es un error, contáctanos en info@w2wglobal.com");
           setChecking(false);
