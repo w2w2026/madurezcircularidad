@@ -389,7 +389,9 @@ function Results({ans,aAns,co,onRestart}) {
   const aSc=Object.values(aAns).reduce((a,b)=>a+(b||0),0);
   const aPct=Math.round((aSc/(AQS.length*3))*100);
 
-  const saveRecord = async(aiData)=>{
+  const saveRecord = async(aiData, ansData, aAnsData)=>{
+    const ans = ansData || {};
+    const aAns = aAnsData || {};
     // Convert numeric answers to text labels for readability
     const answerTexts = {};
     QS.forEach(q=>{
@@ -469,7 +471,7 @@ function Results({ans,aAns,co,onRestart}) {
 
   useEffect(()=>{
     // 1. Save to SheetDB immediately - no AI needed
-    saveRecord(null);
+    saveRecord(null, ans, aAns);
     // 2. Generate AI analysis separately
     (async()=>{
       let aiData;
@@ -932,7 +934,7 @@ function CompanyForm({onNext}) {
   const [checking,setChecking]=useState(false);
   const [consent,setConsent]=useState(false);
   const set=(k,v)=>setF(p=>({...p,[k]:v}));
-  const ok=f.razonSocial&&f.nit&&f.ciudad&&f.pais&&f.employees&&f.contactName&&f.contactEmail;
+  const ok=f.razonSocial&&f.nit&&f.ciudad&&f.pais&&f.employees&&f.sector&&f.whyEC&&f.contactName&&f.contactRole&&f.contactEmail;
   const secs=["Manufactura / Producción Industrial","Servicios Profesionales","Tecnología / Software","Retail / Comercio","Construcción / Inmobiliaria","Agroindustria / Alimentos","Salud / Farmacéutica","Educación","Logística / Transporte","Energía / Utilities","Financiero / Seguros","Turismo / Hospitalidad","Moda / Textil","Otro"];
   const emps=["1-10","11-50","51-200","201-500","501-1000","Más de 1000"];
 
@@ -990,14 +992,14 @@ function CompanyForm({onNext}) {
               <option value="">Seleccionar</option>{emps.map(e=><option key={e} value={e}>{e}</option>)}
             </select>
           </div>
-          <div><label style={css.lbl}>Sector</label>
+          <div><label style={css.lbl}>Sector *</label>
             <select style={css.sel} value={f.sector} onChange={e=>set("sector",e.target.value)}>
               <option value="">Seleccionar</option>{secs.map(s=><option key={s} value={s}>{s}</option>)}
             </select>
           </div>
         </div>
         <div style={{marginTop:12}}>
-          <label style={css.lbl}>¿Por qué le interesa la economía circular?</label>
+          <label style={css.lbl}>¿Por qué le interesa la economía circular? *</label>
           <textarea style={css.ta} value={f.whyEC} onChange={e=>set("whyEC",e.target.value)} placeholder="Cuéntenos qué motivó a su organización..."/>
         </div>
       </div>
@@ -1006,7 +1008,7 @@ function CompanyForm({onNext}) {
         <div style={css.secLbl}>Datos del Responsable</div>
         <div style={css.g2}>
           <div><label style={css.lbl}>Nombre *</label><input style={css.inp} value={f.contactName} onChange={e=>set("contactName",e.target.value)} placeholder="Nombre completo"/></div>
-          <div><label style={css.lbl}>Cargo</label><input style={css.inp} value={f.contactRole} onChange={e=>set("contactRole",e.target.value)} placeholder="Cargo"/></div>
+          <div><label style={css.lbl}>Cargo *</label><input style={css.inp} value={f.contactRole} onChange={e=>set("contactRole",e.target.value)} placeholder="Cargo"/></div>
           <div style={{gridColumn:"1/-1"}}><label style={css.lbl}>Email *</label><input type="email" style={css.inp} value={f.contactEmail} onChange={e=>set("contactEmail",e.target.value)} placeholder="correo@empresa.com"/></div>
         </div>
       </div>
