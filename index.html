@@ -390,7 +390,24 @@ function Results({ans,aAns,co,onRestart}) {
   const aPct=Math.round((aSc/(AQS.length*3))*100);
 
   const saveRecord = async(aiData)=>{
-    const record = {ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData||{},answers:ans,assetAnswers:aAns};
+    // Convert numeric answers to text labels for readability
+    const answerTexts = {};
+    QS.forEach(q=>{
+      const val = ans[q.id];
+      if(val !== undefined) {
+        const opt = q.opts.find(o=>o.value===val);
+        answerTexts[q.id] = opt ? opt.label : (val===null?"No aplica":"");
+      }
+    });
+    const assetTexts = {};
+    const AOPTS_LABELS = ["No / No lo hemos analizado","Posiblemente, sin análisis formal","Sí, hemos identificado oportunidades","Sí, tenemos un plan concreto"];
+    AQS.forEach(q=>{
+      const val = aAns[q.id];
+      if(val !== undefined && val !== null) {
+        assetTexts[q.id] = AOPTS_LABELS[val] || "";
+      }
+    });
+    const record = {ts:new Date().toISOString(),co,ds,score,level:lv.name,aPct,ai:aiData||{},answers:answerTexts,assetAnswers:assetTexts};
     // Save via Apps Script (includes detailed answers)
     try {
       const img = new Image();
